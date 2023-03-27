@@ -7,11 +7,11 @@ export class CreateOrderPmig1679745435023 implements MigrationInterface {
         name: 'order_products',
         columns: [
           {
-            name: 'userId',
+            name: 'order_id',
             type: 'int',
           },
           {
-            name: 'productId',
+            name: 'product_id',
             type: 'int',
           },
           {
@@ -25,13 +25,13 @@ export class CreateOrderPmig1679745435023 implements MigrationInterface {
         ],
         foreignKeys: [
           {
-            columnNames: ['userId'],
+            columnNames: ['order_id'],
             referencedColumnNames: ['id'],
-            referencedTableName: 'user',
+            referencedTableName: 'order',
             onDelete: 'CASCADE',
           },
           {
-            columnNames: ['productId'],
+            columnNames: ['product_id'],
             referencedColumnNames: ['id'],
             referencedTableName: 'product',
             onDelete: 'CASCADE',

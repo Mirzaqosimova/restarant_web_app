@@ -11,4 +11,12 @@ export enum Message {
   BACK = 'back',
   WRONG_PHONE_NUMBER = 'wrong_phone_number',
   SETTINGS = 'settings',
+  ORDER = 'order',
+  DELIVERY = 'delivery',
+  PICKUP = 'pickup',
+  SEND_LOCATION = 'send_location',
+  MY_LOCATIONS = 'my_locations',
+  CONFIRM_LOCATION = 'confirm_location',
+  MENU = 'menu',
+  HISTORY = 'hostory',
 }

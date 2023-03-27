@@ -2,11 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Order } from '../order/order.entity';
+import { Address } from '../address/adress.entity';
 import { Language } from '../shared/enums/languages';
 
 @Entity()
@@ -23,8 +25,8 @@ export class User {
   @Column()
   full_name: string;
 
-  @OneToMany(() => Order, (order) => order.user)
-  orders: Order[];
+  @OneToMany(() => Address, (address) => address.users)
+  address: Address;
 
   @Column({
     type: 'enum',

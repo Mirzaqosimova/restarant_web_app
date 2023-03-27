@@ -5,6 +5,9 @@ import { User } from '../user/user.entity';
 import { BotAction } from './const/button-action';
 import { BotUserStatus } from './const/user-status';
 import { Message } from './const/message';
+import { Address } from '../address/adress.entity';
+import { YandexService } from './yandex.connect';
+import { createQueryBuilder } from 'typeorm';
 
 export class BotService {
   //json
@@ -16,6 +19,7 @@ export class BotService {
   public nameRegex = /^[a-zA-Z]{2,20}$/;
   public chatId;
   private userRepository = AppDataSource.getRepository(User);
+  private addressRepository = AppDataSource.getRepository(Address);
 
   public static getInstance() {
     return this.instance;
@@ -93,10 +97,7 @@ export class BotService {
     //jsonga yozish kk
     await this.ctx.reply('succesfully saved');
 
-    //bet togrlanadi keyn
-    await this.changeSessionStatus(BotUserStatus.SETTING);
-    //SHUNI idsini sessionga opqoyish kere keyin ochiriladi bu
-    return this.ctx.reply('settings', this.getReplyButtons());
+    return this.menu();
   }
 
   async menu() {
@@ -107,14 +108,114 @@ export class BotService {
   async menuResponse() {
     if (this.ctx.message.text === this.ctx.i18n.t(Message.SETTINGS)) {
       await this.changeSessionStatus(BotUserStatus.SETTING);
-      return this.ctx.reply('send name: ', this.getReplyButtons());
+      return this.ctx.reply('Settings tanla: ', this.getReplyButtons());
+    } else if (this.ctx.message.text === this.ctx.i18n.t(Message.ORDER)) {
+      await this.changeSessionStatus(BotUserStatus.CHOOSE_ORDER_TYPE);
+      return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
     }
+  }
+  //pickup qogan
+  chooseOrderType() {
+    if (this.ctx.message.text === this.ctx.i18n.t(Message.DELIVERY)) {
+      this.changeSessionStatus(BotUserStatus.CHOOSE_LOCATION);
+      return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
+    } else if (this.ctx.message.text === this.ctx.i18n.t(Message.BACK)) {
+      return this.menu();
+    }
+  }
+  async chooseLocations() {
+    if (this.ctx.message.text === this.ctx.i18n.t(Message.MY_LOCATIONS)) {
+      const data = await this.addressRepository
+        .createQueryBuilder('address')
+        .select(['address.address'])
+        .innerJoin('address', 'user')
+        .distinct(true)
+        .where('user.chat_id = :id', { id: this.chatId });
+
+      console.log(data);
+
+      return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
+    } else if (this.ctx.message.text === this.ctx.i18n.t(Message.BACK)) {
+      return this.menu();
+    }
+  }
+
+  getMenu() {
+    if (this.ctx.message.text === this.ctx.i18n.t(Message.HISTORY)) {
+      this.changeSessionStatus(BotUserStatus.ORDER_MENU);
+      return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
+    } else if (this.ctx.message.text === this.ctx.i18n.t(Message.BACK)) {
+      console.log('menu');
+
+      return this.menu();
+    }
+  }
+
+  async userGetLocation() {
+    const latitude = this.ctx.message.location.latitude;
+    const longitude = this.ctx.message.location.longitude;
+    const data = await YandexService.getInstance().getAddress(
+      longitude,
+      latitude,
+    );
+    const address_text =
+      data.response.GeoObjectCollection.featureMember[0].GeoObject
+        .metaDataProperty.GeocoderMetaData.text;
+
+    this.changeSessionStatus(BotUserStatus.CONFIRM_LOCATION);
+    return this.ctx.reply(address_text, this.getReplyButtons()).then(() => {
+      this.ctx.session['address'] = address_text;
+      this.ctx.session['latitude'] = latitude;
+      this.ctx.session['longitude'] = longitude;
+    });
+  }
+
+  async setUserLocation() {
+    const address_text = this.ctx.session['address'];
+    const longitude = this.ctx.session['longitude'];
+    const latitude = this.ctx.session['latitude'];
+
+    if (!(address_text && latitude && longitude)) {
+      this.ctx.reply('pleas /start bos');
+    } else {
+      delete this.ctx.session.address;
+      delete this.ctx.session.longitude;
+      delete this.ctx.session.latitude;
+    }
+    const address = await this.addressRepository.findOne({
+      relations: {
+        users: true,
+      },
+      where: {
+        users: {
+          chat_id: this.chatId,
+        },
+        address: address_text,
+      },
+    });
+    console.log(address_text, this.chatId);
+
+    let address_id;
+    if (address !== null) {
+      address_id = address.id;
+    } else {
+      const user = await this.userRepository.findOneBy({
+        chat_id: this.chatId,
+      });
+      await this.addressRepository
+        .save(new Address(user, address_text, longitude, latitude))
+        .then((res) => {
+          console.log(address_id);
+          address_id = res.id;
+        });
+    }
+    this.changeSessionStatus(BotUserStatus.ORDER_MENU);
+    return this.ctx.reply('menuni tanlang', this.getReplyButtons(address_id));
   }
 
   async settings() {
     if (this.ctx.message.text === this.ctx.i18n.t(Message.SETTINGS_NAME)) {
       await this.changeSessionStatus(BotUserStatus.SET_SEND_NAME);
-      //back digan button
 
       return this.ctx.reply('send name: ', this.getReplyButtons());
     } else if (
@@ -204,6 +305,7 @@ export class BotService {
     }
     return this.ctx.deleteMessage(this.ctx.callbackQuery.message.message_id);
   }
+
   getInline() {
     if (
       this.userStatus === BotUserStatus.START ||
@@ -219,7 +321,7 @@ export class BotService {
     }
   }
 
-  getReplyButtons() {
+  getReplyButtons(address_id?: number) {
     if (
       this.userStatus === BotUserStatus.SEND_PHONE ||
       this.userStatus === BotUserStatus.SET_SEND_PHONE
@@ -262,7 +364,74 @@ export class BotService {
     } else if (this.userStatus === BotUserStatus.MENU) {
       return {
         reply_markup: {
-          keyboard: [[{ text: this.ctx.i18n.t(Message.SETTINGS) }]],
+          keyboard: [
+            [{ text: this.ctx.i18n.t(Message.SETTINGS) }],
+            [{ text: this.ctx.i18n.t(Message.ORDER) }],
+          ],
+          resize_keyboard: true,
+          one_time_keyboard: true,
+        },
+      };
+    } else if (this.userStatus === BotUserStatus.ORDER_MENU) {
+      return {
+        reply_markup: {
+          keyboard: [
+            [
+              Markup.button.webApp(
+                this.ctx.i18n.t(Message.MENU),
+                'https://orkhan.gitbook.io/typeorm/docs/select-query-builder#joining-relations',
+              ),
+            ],
+            [{ text: this.ctx.i18n.t(Message.HISTORY) }],
+            [{ text: this.ctx.i18n.t(Message.BACK) }],
+          ],
+          resize_keyboard: true,
+          one_time_keyboard: true,
+        },
+      };
+    } else if (this.userStatus === BotUserStatus.CONFIRM_LOCATION) {
+      return {
+        reply_markup: {
+          keyboard: [
+            [
+              {
+                text: this.ctx.i18n.t(Message.SEND_LOCATION),
+                request_location: true,
+              },
+              { text: this.ctx.i18n.t(Message.CONFIRM_LOCATION) },
+            ],
+          ],
+          resize_keyboard: true,
+          one_time_keyboard: true,
+        },
+      };
+    } else if (this.userStatus === BotUserStatus.CHOOSE_ORDER_TYPE) {
+      return {
+        reply_markup: {
+          keyboard: [
+            [
+              { text: this.ctx.i18n.t(Message.DELIVERY) },
+              { text: this.ctx.i18n.t(Message.PICKUP) },
+            ],
+            [{ text: this.ctx.i18n.t(Message.BACK) }],
+          ],
+          resize_keyboard: true,
+          one_time_keyboard: true,
+        },
+      };
+    } else if (this.userStatus === BotUserStatus.CHOOSE_LOCATION) {
+      return {
+        reply_markup: {
+          keyboard: [
+            [
+              {
+                text: this.ctx.i18n.t(Message.SEND_LOCATION),
+                request_location: true,
+              },
+              { text: this.ctx.i18n.t(Message.MY_LOCATIONS) },
+            ],
+            [{ text: this.ctx.i18n.t(Message.BACK) }],
+          ],
           resize_keyboard: true,
           one_time_keyboard: true,
         },

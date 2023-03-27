@@ -1,4 +1,12 @@
 {
+  "menu": "menu",
+  "hostory": "hostory",
+  "confirm_location": "confirm_location",
+  "send_location": "send_location",
+  "my_locations": "my_locations",
+  "delivery": "delivery",
+  "pickup": "pickup",
+  "order": "order",
   "settings": "settings",
   "wrong_phone_number": "wrong_phone_number",
   "sattings_name": "sattings_name",

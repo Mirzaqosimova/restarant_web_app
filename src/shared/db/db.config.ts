@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import { Address } from '../../address/adress.entity';
 import { Category } from '../../category/category.entity';
 import { Order } from '../../order/order.entity';
 import { Product } from '../../product/product.entity';
@@ -15,7 +16,7 @@ const AppDataSource = new DataSource({
   database: DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [Category, Order, Product, User],
+  entities: [Category, Order, Product, Address, User],
   migrationsTableName: 'migrations',
   migrations: [CreateOrderPmig1679745435023],
 });

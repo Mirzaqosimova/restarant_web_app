@@ -48,8 +48,6 @@ bot.start(() => {
   return botService.start();
 });
 
-//nameRegex.test(name)
-
 bot.on(message('text'), () => {
   if (botService.userStatus === BotUserStatus.SETTING) {
     return botService.settings();
@@ -63,13 +61,19 @@ bot.on(message('text'), () => {
     return botService.menuResponse();
   } else if (botService.userStatus === BotUserStatus.SET_SEND_NAME) {
     return botService.setName();
+  } else if (botService.userStatus === BotUserStatus.CHOOSE_ORDER_TYPE) {
+    return botService.chooseOrderType();
+    //beeeeeeeeeeeeet
+  } else if (botService.userStatus === BotUserStatus.CHOOSE_LOCATION) {
+    return botService.chooseLocations();
+  } else if (botService.userStatus === BotUserStatus.CONFIRM_LOCATION) {
+    return botService.setUserLocation();
+  } else if (botService.userStatus === BotUserStatus.ORDER_MENU) {
+    return botService.getMenu();
   }
 });
 
 bot.action(Object.values(BotAction), async () => {
-  if (botService.userStatus === BotUserStatus.SET_SEND_LANGUAGE) {
-    // return botService.();
-  }
   return botService.setLanguageAskPhoneNumber();
 });
 bot.on(message('contact'), () => {
@@ -77,6 +81,15 @@ bot.on(message('contact'), () => {
     return botService.setPhoneNumber(true);
   }
   return botService.getPhoneNumberSendMenu(true);
+});
+bot.on(message('location'), () => {
+  if (
+    botService.userStatus === BotUserStatus.CONFIRM_LOCATION ||
+    botService.userStatus === BotUserStatus.CHOOSE_LOCATION
+  ) {
+    return botService.userGetLocation();
+  }
+  //this action not exists
 });
 app.use(bot.webhookCallback('/bot'));
 

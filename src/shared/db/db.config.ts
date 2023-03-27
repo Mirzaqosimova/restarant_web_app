@@ -15,9 +15,9 @@ const AppDataSource = new DataSource({
   database: DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [Category, Order, Product,User],
+  entities: [Category, Order, Product, User],
   migrationsTableName: 'migrations',
-  migrations: [CreateOrderPmig1679745435023]
+  migrations: [CreateOrderPmig1679745435023],
 });
 
 export default AppDataSource;

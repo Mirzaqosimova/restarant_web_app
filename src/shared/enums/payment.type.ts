@@ -1,5 +1,5 @@
-export enum PaymentType{
-    CLICK,
-    PAYME,
-    CASH
+export enum PaymentType {
+  CLICK,
+  PAYME,
+  CASH,
 }

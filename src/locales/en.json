@@ -1,13 +1,13 @@
 {
-    "wrong_phone_number": "wrong_phone_number",
-    "sattings_name": "sattings_name",
-    "settings_phone": "settings_phone",
-    "settings_language": "settings_language",
-    "back": "back",
-    "wrong_action": "Wrong action",
-    "phone_number_already_exists": "phone_number_already_exists",
-    "ask_phone_number": "Enter phone number",
-    "ask_phone_number_button": "Send phone number",
-    "language_set": "Language setted"
-
+  "settings": "settings",
+  "wrong_phone_number": "wrong_phone_number",
+  "sattings_name": "sattings_name",
+  "settings_phone": "settings_phone",
+  "settings_language": "settings_language",
+  "back": "back",
+  "wrong_action": "Wrong action",
+  "phone_number_already_exists": "phone_number_already_exists",
+  "ask_phone_number": "Enter phone number",
+  "ask_phone_number_button": "Send phone number",
+  "language_set": "Language setted"
 }

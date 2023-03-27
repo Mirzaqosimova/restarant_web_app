@@ -1,5 +1,5 @@
-export enum BotAction{
-    ENGLISH = 'en',
-    RUSSIAN = 'ru',
-    UZBEK = 'uz'
+export enum BotAction {
+  ENGLISH = 'en',
+  RUSSIAN = 'ru',
+  UZBEK = 'uz',
 }

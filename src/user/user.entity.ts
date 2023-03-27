@@ -1,30 +1,40 @@
-import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm"
-import { Order } from "../order/order.entity"
-import { Language } from "../shared/enums/languages"
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Order } from '../order/order.entity';
+import { Language } from '../shared/enums/languages';
 
 @Entity()
-export class User{
-    @PrimaryGeneratedColumn()
-    id:number
-  
-    @Column()
-    chat_id: number
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    phone_number: string
+  @Column({ unique: true })
+  chat_id: number;
 
-    @Column()
-    full_name: string
+  @Column()
+  phone_number: string;
 
-    @OneToMany(() => Order, order => order.user)
-    orders: Order[]
+  @Column()
+  full_name: string;
 
-    @Column({
-        type: "enum",
-        enum: Language,
-    })
-    language: Language
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 
-    @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })
-    created_at: string
+  @Column({
+    type: 'enum',
+    enum: Language,
+  })
+  language: Language;
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
+  created_at: string;
 }

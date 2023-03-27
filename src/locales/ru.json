@@ -1,0 +1,13 @@
+{
+    "wrong_phone_number": "wrong_phone_number",
+    "sattings_name": "sattings_name",
+    "settings_phone": "settings_phone",
+    "settings_language": "settings_language",
+    "back": "back",
+    "wrong_action": "неправильный ход",
+    "phone_number_already_exists": "phone_number_already_exists",
+    "ask_phone_number": "введите номер телефона",
+    "ask_phone_number_button": "отправить номер телефона",
+    "language_set": "язык установлен"
+
+}

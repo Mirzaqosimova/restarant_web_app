@@ -4,12 +4,11 @@
   "description": "",
   "main": "./src/main.js",
   "scripts": {
-    "start": "node ./dist/main.js",
+    "start": "tsc && node ./dist/main.js",
     "start:dev": "nodemon ./src/main.ts",
-    "build": "tsc",
-    "typeorm": "ts-node ./node_modules/typeorm/cli.js" ,
+    "typeorm": "ts-node ./node_modules/typeorm/cli.js",
     "migration:up": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:run -d src/shared/db/db.config.ts"
-      },
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -21,6 +20,7 @@
     "nodemon": "^2.0.22",
     "pg": "^8.10.0",
     "telegraf": "^4.12.2",
+    "telegraf-i18n": "^6.6.0",
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",
     "typeorm": "^0.3.12",

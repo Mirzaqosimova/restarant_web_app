@@ -6,8 +6,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Order } from '../order/order.entity';
-import { User } from '../user/user.entity';
+import { Order } from './order.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Address {
@@ -15,10 +15,10 @@ export class Address {
   id: number;
 
   @OneToMany(() => Order, (order) => order.adress)
-  order: Order[];
+  orders: Order[];
 
-  @ManyToOne(() => User, (user) => user.address)
-  users: User;
+  @ManyToOne(() => User, (user) => user.addresses)
+  user: User;
 
   @Column()
   address: string;
@@ -30,7 +30,7 @@ export class Address {
   lat: number;
 
   constructor(user: User, address: string, long: number, lat: number) {
-    this.users = user;
+    this.user = user;
     this.address = address;
     this.lat = lat;
     this.long = long;

@@ -8,6 +8,7 @@ export enum BotUserStatus {
   SET_SEND_LANGUAGE = 'send_language',
   CHOOSE_ORDER_TYPE = 'location',
   CHOOSE_LOCATION = 'choose_location',
+  CHOOSE_SAVED_LOCATION = 'choose_saved_location',
   CONFIRM_LOCATION = 'confirm_location',
   ORDER_MENU = 'order_menu',
 }

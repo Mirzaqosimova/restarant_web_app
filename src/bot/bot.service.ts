@@ -1,11 +1,11 @@
 import { Context, Markup, NarrowedContext } from 'telegraf';
 import { Update, CallbackQuery } from 'telegraf/typings/core/types/typegram';
 import AppDataSource from '../shared/db/db.config';
-import { User } from '../user/user.entity';
+import { User } from '../entity/user.entity';
 import { BotAction } from './const/button-action';
 import { BotUserStatus } from './const/user-status';
 import { Message } from './const/message';
-import { Address } from '../address/adress.entity';
+import { Address } from '../entity/adress.entity';
 import { YandexService } from './yandex.connect';
 import { createQueryBuilder } from 'typeorm';
 
@@ -114,11 +114,13 @@ export class BotService {
       return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
     }
   }
-  //pickup qogan
   chooseOrderType() {
     if (this.ctx.message.text === this.ctx.i18n.t(Message.DELIVERY)) {
       this.changeSessionStatus(BotUserStatus.CHOOSE_LOCATION);
       return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
+    } else if (this.ctx.message.text === this.ctx.i18n.t(Message.PICKUP)) {
+      this.changeSessionStatus(BotUserStatus.ORDER_MENU);
+      return this.ctx.reply('menuni tanlang', this.getReplyButtons());
     } else if (this.ctx.message.text === this.ctx.i18n.t(Message.BACK)) {
       return this.menu();
     }
@@ -128,13 +130,12 @@ export class BotService {
       const data = await this.addressRepository
         .createQueryBuilder('address')
         .select(['address.address'])
-        .innerJoin('address', 'user')
+        .innerJoin('address.user', 'user')
         .distinct(true)
-        .where('user.chat_id = :id', { id: this.chatId });
-
-      console.log(data);
-
-      return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
+        .where('user.chat_id = :id', { id: this.chatId })
+        .getRawMany();
+      this.changeSessionStatus(BotUserStatus.CHOOSE_SAVED_LOCATION);
+      return this.ctx.reply('kak vam udobna?: ', this.addressButtonList(data));
     } else if (this.ctx.message.text === this.ctx.i18n.t(Message.BACK)) {
       return this.menu();
     }
@@ -145,8 +146,6 @@ export class BotService {
       this.changeSessionStatus(BotUserStatus.ORDER_MENU);
       return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
     } else if (this.ctx.message.text === this.ctx.i18n.t(Message.BACK)) {
-      console.log('menu');
-
       return this.menu();
     }
   }
@@ -184,10 +183,10 @@ export class BotService {
     }
     const address = await this.addressRepository.findOne({
       relations: {
-        users: true,
+        user: true,
       },
       where: {
-        users: {
+        user: {
           chat_id: this.chatId,
         },
         address: address_text,
@@ -211,6 +210,35 @@ export class BotService {
     }
     this.changeSessionStatus(BotUserStatus.ORDER_MENU);
     return this.ctx.reply('menuni tanlang', this.getReplyButtons(address_id));
+  }
+  /**bu yeeeeeeeeeeeer
+   *
+   *
+   *
+   *
+   */
+  async setSavedLocation() {
+    if (this.ctx.message.text === this.ctx.i18n.t(Message.BACK)) {
+      this.changeSessionStatus(BotUserStatus.CHOOSE_LOCATION);
+      return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
+    } else {
+      const address = await this.addressRepository.findOne({
+        relations: {
+          user: true,
+        },
+        where: {
+          user: {
+            chat_id: this.chatId,
+          },
+          address: this.ctx.message.text,
+        },
+      });
+      if (address === null) {
+        return this.ctx.reply('Manzil topilmadi');
+      }
+      this.changeSessionStatus(BotUserStatus.ORDER_MENU);
+      return this.ctx.reply('menuni tanlang', this.getReplyButtons(address.id));
+    }
   }
 
   async settings() {
@@ -265,10 +293,11 @@ export class BotService {
   getPhone(action: boolean) {
     let phone;
     if (action) {
-      phone = String(this.ctx.message.contact.phone_number);
+      phone = '+' + String(this.ctx.message.contact.phone_number);
     } else {
       phone = String(this.ctx.message.text);
     }
+
     return phone;
   }
   async validationPhoneNumber(phone: string) {
@@ -328,7 +357,7 @@ export class BotService {
     ) {
       const back =
         this.userStatus === BotUserStatus.SET_SEND_PHONE
-          ? [{ text: 'back' }]
+          ? [{ text: this.ctx.i18n.t(Message.BACK) }]
           : [];
 
       return {
@@ -365,8 +394,8 @@ export class BotService {
       return {
         reply_markup: {
           keyboard: [
-            [{ text: this.ctx.i18n.t(Message.SETTINGS) }],
             [{ text: this.ctx.i18n.t(Message.ORDER) }],
+            [{ text: this.ctx.i18n.t(Message.SETTINGS) }],
           ],
           resize_keyboard: true,
           one_time_keyboard: true,
@@ -439,11 +468,28 @@ export class BotService {
     } else {
       return {
         reply_markup: {
-          keyboard: [[{ text: 'back' }]],
+          keyboard: [[{ text: this.ctx.i18n.t(Message.BACK) }]],
           resize_keyboard: true,
           one_time_keyboard: true,
         },
       };
     }
+  }
+
+  addressButtonList(data: any[]) {
+    let keyboard: any[] = [];
+
+    data.map((item) => {
+      keyboard.push([{ text: item.address_address }]);
+    });
+    keyboard.push([{ text: this.ctx.i18n.t(Message.BACK) }]);
+
+    return {
+      reply_markup: {
+        keyboard: keyboard,
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    };
   }
 }

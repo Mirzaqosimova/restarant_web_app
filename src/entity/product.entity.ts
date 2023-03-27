@@ -7,7 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Category } from '../category/category.entity';
+import { Category } from './category.entity';
 // import { OrderProducts } from "../order/order.products"
 
 @Entity()

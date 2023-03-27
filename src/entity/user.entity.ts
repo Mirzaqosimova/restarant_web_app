@@ -8,7 +8,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Address } from '../address/adress.entity';
+import { Address } from './adress.entity';
 import { Language } from '../shared/enums/languages';
 
 @Entity()
@@ -25,8 +25,8 @@ export class User {
   @Column()
   full_name: string;
 
-  @OneToMany(() => Address, (address) => address.users)
-  address: Address;
+  @OneToMany(() => Address, (address) => address.user)
+  addresses: Address[];
 
   @Column({
     type: 'enum',

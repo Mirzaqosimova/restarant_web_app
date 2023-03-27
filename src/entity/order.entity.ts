@@ -6,10 +6,10 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Address } from '../address/adress.entity';
+import { Address } from './adress.entity';
 import { OrderStatus } from '../shared/enums/order.status';
 import { PaymentType } from '../shared/enums/payment.type';
-import { User } from '../user/user.entity';
+import { User } from './user.entity';
 //import { OrderProducts } from "./order.products";
 
 @Entity()
@@ -17,7 +17,7 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Address, (address) => address.order)
+  @ManyToOne(() => Address, (address) => address.orders)
   adress: Address;
 
   //   @OneToMany(() => OrderProducts, order_products => order_products.order)

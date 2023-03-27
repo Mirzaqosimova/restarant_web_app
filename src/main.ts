@@ -63,13 +63,14 @@ bot.on(message('text'), () => {
     return botService.setName();
   } else if (botService.userStatus === BotUserStatus.CHOOSE_ORDER_TYPE) {
     return botService.chooseOrderType();
-    //beeeeeeeeeeeeet
   } else if (botService.userStatus === BotUserStatus.CHOOSE_LOCATION) {
     return botService.chooseLocations();
   } else if (botService.userStatus === BotUserStatus.CONFIRM_LOCATION) {
     return botService.setUserLocation();
   } else if (botService.userStatus === BotUserStatus.ORDER_MENU) {
     return botService.getMenu();
+  }else if (botService.userStatus === BotUserStatus.CHOOSE_SAVED_LOCATION) {
+    return botService.setSavedLocation();
   }
 });
 
@@ -82,14 +83,14 @@ bot.on(message('contact'), () => {
   }
   return botService.getPhoneNumberSendMenu(true);
 });
-bot.on(message('location'), () => {
+bot.on(message('location'), (ctx: any) => {
   if (
     botService.userStatus === BotUserStatus.CONFIRM_LOCATION ||
     botService.userStatus === BotUserStatus.CHOOSE_LOCATION
   ) {
     return botService.userGetLocation();
   }
-  //this action not exists
+ return ctx.reply('This action not exists')
 });
 app.use(bot.webhookCallback('/bot'));
 

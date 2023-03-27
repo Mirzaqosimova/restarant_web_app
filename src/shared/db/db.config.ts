@@ -1,9 +1,9 @@
 import { DataSource } from 'typeorm';
-import { Address } from '../../address/adress.entity';
-import { Category } from '../../category/category.entity';
-import { Order } from '../../order/order.entity';
-import { Product } from '../../product/product.entity';
-import { User } from '../../user/user.entity';
+import { Address } from '../../entity/adress.entity';
+import { Category } from '../../entity/category.entity';
+import { Order } from '../../entity/order.entity';
+import { Product } from '../../entity/product.entity';
+import { User } from '../../entity/user.entity';
 import { DB_NAME, DB_PASSWORD, DB_USER } from '../const';
 import { CreateOrderPmig1679745435023 } from '../migration/1679745435023-CreateOrderPmig';
 

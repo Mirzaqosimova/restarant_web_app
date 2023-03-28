@@ -7,7 +7,6 @@ import { BotUserStatus } from './const/user-status';
 import { Message } from './const/message';
 import { Address } from '../entity/adress.entity';
 import { YandexService } from './yandex.connect';
-import { createQueryBuilder } from 'typeorm';
 
 export class BotService {
   //json

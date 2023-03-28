@@ -1,5 +1,5 @@
-const express = require('express');
-const bodyParser = require('body-parser');
+import express from 'express';
+import bodyParser from 'body-parser';
 import path from 'path';
 import { Telegraf, session } from 'telegraf';
 import { message } from 'telegraf/filters';
@@ -10,12 +10,38 @@ import AppDataSource from './shared/db/db.config';
 const { match } = require('telegraf-i18n');
 import TelegrafI18n from 'telegraf-i18n';
 import { BotUserStatus } from './bot/const/user-status';
+import { ValidationError } from 'express-validation';
+const categoryRoute = require('./router/category-routers')
+import createHttpError from 'http-errors'
 
 const app = express();
 
+app.use(express.json());           
+app.use(express.urlencoded()); 
+
+
+//* Error Handler
+app.use((err, req, res, next) => {
+  
+  res.status(err.status || 500);
+  res.json({
+      error: {
+          status: err.status || 500,
+          message: err.message
+      }
+  })
+});
+app.use(function(err, req, res, next) {
+  if (err instanceof ValidationError) {
+    return res.status(err.statusCode).json(err)
+  }
+
+  return res.status(500).json(err)
+})
+app.use('/category',categoryRoute)
+
 const bot = new Telegraf(BOT_TOKEN);
 const botService = BotService.getInstance();
-app.use(bodyParser.json());
 bot.use(session());
 const i18n = new TelegrafI18n({
   defaultLanguage: 'en',
@@ -77,12 +103,14 @@ bot.on(message('text'), () => {
 bot.action(Object.values(BotAction), async () => {
   return botService.setLanguageAskPhoneNumber();
 });
+
 bot.on(message('contact'), () => {
   if (botService.userStatus === BotUserStatus.SET_SEND_PHONE) {
     return botService.setPhoneNumber(true);
   }
   return botService.getPhoneNumberSendMenu(true);
 });
+
 bot.on(message('location'), (ctx: any) => {
   if (
     botService.userStatus === BotUserStatus.CONFIRM_LOCATION ||
@@ -92,6 +120,7 @@ bot.on(message('location'), (ctx: any) => {
   }
  return ctx.reply('This action not exists')
 });
+
 app.use(bot.webhookCallback('/bot'));
 
 bot.telegram.setWebhook('https://58d4-84-54-94-192.eu.ngrok.io/bot');
@@ -104,6 +133,9 @@ AppDataSource.initialize()
     console.error('Error during Data Source initialization', err);
   });
 
+
 app.listen(PORT, () => {
   console.log(`Bot listening at http://localhost:${PORT}`);
 });
+
+

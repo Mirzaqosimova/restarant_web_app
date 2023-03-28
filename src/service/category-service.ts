@@ -35,8 +35,8 @@ export class CategoryService {
       .catch((err) => res.json(err));
   }
 
-  async findOne(id: number) {
-    return this.categoryRepository.findOne({
+  async findOne(id: number,query?: any) {
+    if(!query){ return this.categoryRepository.findOne({
       relations: {
         products: true,
       },
@@ -44,6 +44,9 @@ export class CategoryService {
         id,
       },
     });
+} else{
+    return
+}
   }
 
   async edit(payload, res) {

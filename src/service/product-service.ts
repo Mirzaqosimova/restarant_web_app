@@ -1,6 +1,4 @@
-import { Response } from 'express-serve-static-core';
 import { Not } from 'typeorm';
-import { Category } from '../entity/category.entity';
 import { Product } from '../entity/product.entity';
 import AppDataSource from '../shared/db/db.config';
 import { ApiResponse } from '../shared/response/base.response';
@@ -14,7 +12,6 @@ export class ProductService {
     return this.instance;
   }
   private productRepository = AppDataSource.getRepository(Product);
-  private categoryRepository = AppDataSource.getRepository(Category);
 
   async create(payload, res): Promise<void> {
     const [data, category] = await Promise.all([
@@ -55,8 +52,7 @@ export class ProductService {
       queryData.where['products'] = { is_active: query.isActive };
     }
 
-    return this.categoryRepository
-      .find(queryData)
+    return this.categoryService.findOne(1,queryData)
       .then((data) => res.json(ApiResponse.Success(data)))
       .catch((err) => res.json(err));
   }

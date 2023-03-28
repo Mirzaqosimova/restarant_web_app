@@ -45,7 +45,7 @@ export class CategoryService {
       },
     });
 } else{
-    return
+    return this.categoryRepository.findOne(query)
 }
   }
 

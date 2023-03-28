@@ -1,4 +1,1 @@
-export class MediasService {
-
-
-}
+export class MediasService {}

@@ -1,5 +1,5 @@
-export enum ValidationType{
-    BODY,
-    PARAM,
-    QUERY
+export enum ValidationType {
+  BODY,
+  PARAM,
+  QUERY,
 }

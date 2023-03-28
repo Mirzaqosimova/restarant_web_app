@@ -11,34 +11,33 @@ const { match } = require('telegraf-i18n');
 import TelegrafI18n from 'telegraf-i18n';
 import { BotUserStatus } from './bot/const/user-status';
 import { ValidationError } from 'express-validation';
-const categoryRoute = require('./router/category-routers')
-import createHttpError from 'http-errors'
+const categoryRoute = require('./router/category-router');
+const productRoute = require('./router/product-router');
 
 const app = express();
 
-app.use(express.json());           
-app.use(express.urlencoded()); 
-
+app.use(express.json());
+app.use(express.urlencoded());
 
 //* Error Handler
 app.use((err, req, res, next) => {
-  
   res.status(err.status || 500);
   res.json({
-      error: {
-          status: err.status || 500,
-          message: err.message
-      }
-  })
+    error: {
+      status: err.status || 500,
+      message: err.message,
+    },
+  });
 });
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   if (err instanceof ValidationError) {
-    return res.status(err.statusCode).json(err)
+    return res.status(err.statusCode).json(err);
   }
 
-  return res.status(500).json(err)
-})
-app.use('/category',categoryRoute)
+  return res.status(500).json(err);
+});
+app.use('/category', categoryRoute);
+app.use('/product', productRoute);
 
 const bot = new Telegraf(BOT_TOKEN);
 const botService = BotService.getInstance();
@@ -95,7 +94,7 @@ bot.on(message('text'), () => {
     return botService.setUserLocation();
   } else if (botService.userStatus === BotUserStatus.ORDER_MENU) {
     return botService.getMenu();
-  }else if (botService.userStatus === BotUserStatus.CHOOSE_SAVED_LOCATION) {
+  } else if (botService.userStatus === BotUserStatus.CHOOSE_SAVED_LOCATION) {
     return botService.setSavedLocation();
   }
 });
@@ -118,7 +117,7 @@ bot.on(message('location'), (ctx: any) => {
   ) {
     return botService.userGetLocation();
   }
- return ctx.reply('This action not exists')
+  return ctx.reply('This action not exists');
 });
 
 app.use(bot.webhookCallback('/bot'));
@@ -133,9 +132,6 @@ AppDataSource.initialize()
     console.error('Error during Data Source initialization', err);
   });
 
-
 app.listen(PORT, () => {
   console.log(`Bot listening at http://localhost:${PORT}`);
 });
-
-

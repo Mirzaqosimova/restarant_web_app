@@ -3,12 +3,9 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Category } from './category.entity';
-// import { OrderProducts } from "../order/order.products"
 
 @Entity()
 export class Product {
@@ -29,6 +26,9 @@ export class Product {
 
   @Column()
   price: number;
+
+  @Column({ default: true })
+  is_active: boolean;
 
   @CreateDateColumn({
     type: 'timestamp',

@@ -9,7 +9,6 @@ import { Address } from '../entity/adress.entity';
 import { YandexService } from './yandex.connect';
 
 export class BotService {
-  //json
 
   private static instance = new BotService();
   public userStatus;
@@ -132,6 +131,7 @@ export class BotService {
         .innerJoin('address.user', 'user')
         .distinct(true)
         .where('user.chat_id = :id', { id: this.chatId })
+        .take(10)
         .getRawMany();
       this.changeSessionStatus(BotUserStatus.CHOOSE_SAVED_LOCATION);
       return this.ctx.reply('kak vam udobna?: ', this.addressButtonList(data));

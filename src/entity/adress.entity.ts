@@ -6,7 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Order } from './order.entity';
+import { Orders } from './order.entity';
 import { User } from './user.entity';
 
 @Entity()
@@ -14,23 +14,19 @@ export class Address {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToMany(() => Order, (order) => order.adress)
-  orders: Order[];
+  @OneToMany(() => Orders, (order) => order.address)
+  orders: Orders[];
 
-  @ManyToOne(() => User, (user) => user.addresses)
-  user: User;
-
-  @Column()
+  @Column({ nullable: false })
   address: string;
 
-  @Column({ type: 'real' })
+  @Column({ type: 'real', nullable: false })
   long: number;
 
-  @Column({ type: 'real' })
+  @Column({ type: 'real', nullable: false })
   lat: number;
 
-  constructor(user: User, address: string, long: number, lat: number) {
-    this.user = user;
+  constructor(address: string, long: number, lat: number) {
     this.address = address;
     this.lat = lat;
     this.long = long;

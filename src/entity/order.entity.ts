@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -10,20 +11,21 @@ import { Address } from './adress.entity';
 import { OrderStatus } from '../shared/enums/order.status';
 import { PaymentType } from '../shared/enums/payment.type';
 import { User } from './user.entity';
-//import { OrderProducts } from "./order.products";
 
-@Entity()
-export class Order {
+@Entity('orders')
+export class Orders {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @JoinColumn({ name: 'address_id' })
   @ManyToOne(() => Address, (address) => address.orders)
-  adress: Address;
+  address: Address;
+ 
+  @JoinColumn({ name: 'user_id' })
+  @ManyToOne(() => User, (user) => user.orders)
+  user: User;
 
-  //   @OneToMany(() => OrderProducts, order_products => order_products.order)
-  //   order_products: OrderProducts[];
-
-  @Column()
+  @Column({ nullable: false })
   phone_number: string;
 
   @Column()

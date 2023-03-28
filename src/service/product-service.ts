@@ -1,4 +1,4 @@
-import { Not } from 'typeorm';
+import { Any, Not } from 'typeorm';
 import { Product } from '../entity/product.entity';
 import AppDataSource from '../shared/db/db.config';
 import { ApiResponse } from '../shared/response/base.response';
@@ -101,7 +101,20 @@ export class ProductService {
       })
       .catch((err) => res.json(err));
   }
+  async findAndValidateIds(ids: number[],res){
+const data = await this.productRepository.find({
+  select: {
+id: true,
+price: true
+  },
+ where: { id: Any(ids)},
+})
 
+if(ids.length !== data.length){
+ return res.json(ApiResponse.NotFound("Some products not found"))
+}
+return data
+}
   delete({ id }, res) {
     return this.productRepository
       .delete({ id })

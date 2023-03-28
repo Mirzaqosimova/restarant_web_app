@@ -10,8 +10,9 @@ import {
 } from 'typeorm';
 import { Address } from './adress.entity';
 import { Language } from '../shared/enums/languages';
+import { Orders } from './order.entity';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -19,14 +20,14 @@ export class User {
   @Column({ unique: true })
   chat_id: number;
 
-  @Column()
+  @Column({ nullable: false })
   phone_number: string;
 
-  @Column()
+  @Column({ nullable: false })
   full_name: string;
 
-  @OneToMany(() => Address, (address) => address.user)
-  addresses: Address[];
+  @OneToMany(() => Orders, (order) => order.user)
+  orders: Orders[];
 
   @Column({
     type: 'enum',

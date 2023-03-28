@@ -35,18 +35,19 @@ export class CategoryService {
       .catch((err) => res.json(err));
   }
 
-  async findOne(id: number,query?: any) {
-    if(!query){ return this.categoryRepository.findOne({
-      relations: {
-        products: true,
-      },
-      where: {
-        id,
-      },
-    });
-} else{
-    return this.categoryRepository.findOne(query)
-}
+  async findOne(id: number, query?: any) {
+    if (!query) {
+      return this.categoryRepository.findOne({
+        relations: {
+          products: true,
+        },
+        where: {
+          id,
+        },
+      });
+    } else {
+      return this.categoryRepository.findOne(query);
+    }
   }
 
   async edit(payload, res) {

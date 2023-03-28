@@ -27,13 +27,13 @@ export class CreateOrderPmig1679745435023 implements MigrationInterface {
           {
             columnNames: ['order_id'],
             referencedColumnNames: ['id'],
-            referencedTableName: 'order',
+            referencedTableName: 'orders',
             onDelete: 'CASCADE',
           },
           {
             columnNames: ['product_id'],
             referencedColumnNames: ['id'],
-            referencedTableName: 'product',
+            referencedTableName: 'products',
             onDelete: 'CASCADE',
           },
         ],

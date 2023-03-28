@@ -2,29 +2,31 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Category } from './category.entity';
 
-@Entity()
+@Entity('products')
 export class Product {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @JoinColumn({ name: 'category_id' })
   @ManyToOne(() => Category, (category) => category.products)
   category: Category;
 
-  @Column()
+  @Column({ nullable: false })
   file_name: string;
 
-  @Column()
+  @Column({ nullable: false })
   name: string;
 
   @Column()
   description: string;
 
-  @Column()
+  @Column({ nullable: false })
   price: number;
 
   @Column({ default: true })

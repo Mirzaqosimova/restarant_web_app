@@ -13,6 +13,7 @@ import { BotUserStatus } from './bot/const/user-status';
 import { ValidationError } from 'express-validation';
 const categoryRoute = require('./router/category-router');
 const productRoute = require('./router/product-router');
+const orderRoute = require('./router/order-router');
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use(function (err, req, res, next) {
 });
 app.use('/category', categoryRoute);
 app.use('/product', productRoute);
+app.use('/order', orderRoute);
 
 const bot = new Telegraf(BOT_TOKEN);
 const botService = BotService.getInstance();
@@ -122,7 +124,7 @@ bot.on(message('location'), (ctx: any) => {
 
 app.use(bot.webhookCallback('/bot'));
 
-bot.telegram.setWebhook('https://58d4-84-54-94-192.eu.ngrok.io/bot');
+bot.telegram.setWebhook('https://6d83-84-54-94-192.eu.ngrok.io/bot');
 
 AppDataSource.initialize()
   .then(() => {

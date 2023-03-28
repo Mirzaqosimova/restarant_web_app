@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { Address } from '../../entity/adress.entity';
 import { Category } from '../../entity/category.entity';
-import { Order } from '../../entity/order.entity';
+import { Orders } from '../../entity/order.entity';
 import { Product } from '../../entity/product.entity';
 import { User } from '../../entity/user.entity';
 import { DB_NAME, DB_PASSWORD, DB_USER } from '../const';
@@ -16,7 +16,7 @@ const AppDataSource = new DataSource({
   database: DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [Category, Order, Product, Address, User],
+  entities: [Category, Orders, Product, Address, User],
   migrationsTableName: 'migrations',
   migrations: [CreateOrderPmig1679745435023],
 });

@@ -128,7 +128,8 @@ export class BotService {
       const data = await this.addressRepository
         .createQueryBuilder('address')
         .select(['address.address'])
-        .innerJoin('address.user', 'user')
+        .innerJoin("order", "order", "order.addressId = address.id")
+        .innerJoin("user", "user", "user.id = order.userId")
         .distinct(true)
         .where('user.chat_id = :id', { id: this.chatId })
         .take(10)
@@ -180,28 +181,15 @@ export class BotService {
       delete this.ctx.session.longitude;
       delete this.ctx.session.latitude;
     }
-    const address = await this.addressRepository.findOne({
-      relations: {
-        user: true,
-      },
-      where: {
-        user: {
-          chat_id: this.chatId,
-        },
-        address: address_text,
-      },
-    });
+    const address = await this.addressRepository.findOneBy({ address: address_text});
     console.log(address_text, this.chatId);
 
     let address_id;
     if (address !== null) {
       address_id = address.id;
     } else {
-      const user = await this.userRepository.findOneBy({
-        chat_id: this.chatId,
-      });
       await this.addressRepository
-        .save(new Address(user, address_text, longitude, latitude))
+        .save(new Address(address_text, longitude, latitude))
         .then((res) => {
           console.log(address_id);
           address_id = res.id;
@@ -221,17 +209,7 @@ export class BotService {
       this.changeSessionStatus(BotUserStatus.CHOOSE_LOCATION);
       return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
     } else {
-      const address = await this.addressRepository.findOne({
-        relations: {
-          user: true,
-        },
-        where: {
-          user: {
-            chat_id: this.chatId,
-          },
-          address: this.ctx.message.text,
-        },
-      });
+      const address = await  this.addressRepository.findOneBy({ address: this.ctx.message.text})
       if (address === null) {
         return this.ctx.reply('Manzil topilmadi');
       }
@@ -292,7 +270,7 @@ export class BotService {
   getPhone(action: boolean) {
     let phone;
     if (action) {
-      phone = '+' + String(this.ctx.message.contact.phone_number);
+      phone = String(this.ctx.message.contact.phone_number);
     } else {
       phone = String(this.ctx.message.text);
     }
@@ -300,6 +278,7 @@ export class BotService {
     return phone;
   }
   async validationPhoneNumber(phone: string) {
+    
     if (!this.phoneRegex.test(phone)) {
       await this.ctx.reply(this.ctx.i18n.t(Message.WRONG_PHONE_NUMBER));
       return false;

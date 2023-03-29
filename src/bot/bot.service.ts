@@ -1,5 +1,4 @@
-import { Context, Markup, NarrowedContext } from 'telegraf';
-import { Update, CallbackQuery } from 'telegraf/typings/core/types/typegram';
+import { Markup } from 'telegraf';
 import AppDataSource from '../shared/db/db.config';
 import { User } from '../entity/user.entity';
 import { BotAction } from './const/button-action';
@@ -9,7 +8,6 @@ import { Address } from '../entity/adress.entity';
 import { YandexService } from './yandex.connect';
 
 export class BotService {
-
   private static instance = new BotService();
   public userStatus;
   public ctx;
@@ -128,8 +126,8 @@ export class BotService {
       const data = await this.addressRepository
         .createQueryBuilder('address')
         .select(['address.address'])
-        .innerJoin("order", "order", "order.addressId = address.id")
-        .innerJoin("user", "user", "user.id = order.userId")
+        .innerJoin('order', 'order', 'order.addressId = address.id')
+        .innerJoin('user', 'user', 'user.id = order.userId')
         .distinct(true)
         .where('user.chat_id = :id', { id: this.chatId })
         .take(10)
@@ -181,8 +179,9 @@ export class BotService {
       delete this.ctx.session.longitude;
       delete this.ctx.session.latitude;
     }
-    const address = await this.addressRepository.findOneBy({ address: address_text});
-    console.log(address_text, this.chatId);
+    const address = await this.addressRepository.findOneBy({
+      address: address_text,
+    });
 
     let address_id;
     if (address !== null) {
@@ -196,11 +195,14 @@ export class BotService {
         });
     }
     this.changeSessionStatus(BotUserStatus.ORDER_MENU);
-    return this.ctx.reply('menuni tanlang', this.getReplyButtons(address_id));
+    return this.ctx.reply(
+      'menuni tanlang',
+      this.getOrderMenuWebAppButton(address_id),
+    );
   }
   /**bu yeeeeeeeeeeeer
    *
-   *
+   *address user service implement qilib hamma joyga user find one ni togrlab chiqish kk
    *
    *
    */
@@ -209,12 +211,17 @@ export class BotService {
       this.changeSessionStatus(BotUserStatus.CHOOSE_LOCATION);
       return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
     } else {
-      const address = await  this.addressRepository.findOneBy({ address: this.ctx.message.text})
+      const address = await this.addressRepository.findOneBy({
+        address: this.ctx.message.text,
+      });
       if (address === null) {
         return this.ctx.reply('Manzil topilmadi');
       }
       this.changeSessionStatus(BotUserStatus.ORDER_MENU);
-      return this.ctx.reply('menuni tanlang', this.getReplyButtons(address.id));
+      return this.ctx.reply(
+        'menuni tanlang',
+        this.getOrderMenuWebAppButton(address.id),
+      );
     }
   }
 
@@ -278,7 +285,6 @@ export class BotService {
     return phone;
   }
   async validationPhoneNumber(phone: string) {
-    
     if (!this.phoneRegex.test(phone)) {
       await this.ctx.reply(this.ctx.i18n.t(Message.WRONG_PHONE_NUMBER));
       return false;
@@ -328,7 +334,26 @@ export class BotService {
     }
   }
 
-  getReplyButtons(address_id?: number) {
+  getOrderMenuWebAppButton(user_id: number, address_id?: number) {
+    return {
+      reply_markup: {
+        keyboard: [
+          [
+            Markup.button.webApp(
+              this.ctx.i18n.t(Message.MENU),
+              `https://orkhan.gitbook.io/typeorm/docs/select-query-builder#joining-relations?address_id=${address_id}&user_id=${user_id}`,
+            ),
+          ],
+          [{ text: this.ctx.i18n.t(Message.HISTORY) }],
+          [{ text: this.ctx.i18n.t(Message.BACK) }],
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    };
+  }
+
+  getReplyButtons() {
     if (
       this.userStatus === BotUserStatus.SEND_PHONE ||
       this.userStatus === BotUserStatus.SET_SEND_PHONE
@@ -374,23 +399,6 @@ export class BotService {
           keyboard: [
             [{ text: this.ctx.i18n.t(Message.ORDER) }],
             [{ text: this.ctx.i18n.t(Message.SETTINGS) }],
-          ],
-          resize_keyboard: true,
-          one_time_keyboard: true,
-        },
-      };
-    } else if (this.userStatus === BotUserStatus.ORDER_MENU) {
-      return {
-        reply_markup: {
-          keyboard: [
-            [
-              Markup.button.webApp(
-                this.ctx.i18n.t(Message.MENU),
-                'https://orkhan.gitbook.io/typeorm/docs/select-query-builder#joining-relations',
-              ),
-            ],
-            [{ text: this.ctx.i18n.t(Message.HISTORY) }],
-            [{ text: this.ctx.i18n.t(Message.BACK) }],
           ],
           resize_keyboard: true,
           one_time_keyboard: true,
@@ -455,7 +463,7 @@ export class BotService {
   }
 
   addressButtonList(data: any[]) {
-    let keyboard: any[] = [];
+    const keyboard: any[] = [];
 
     data.map((item) => {
       keyboard.push([{ text: item.address_address }]);

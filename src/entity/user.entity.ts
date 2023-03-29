@@ -2,13 +2,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToMany,
-  ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Address } from './adress.entity';
 import { Language } from '../shared/enums/languages';
 import { Orders } from './order.entity';
 

@@ -1,5 +1,3 @@
-import { Request, Response } from 'express-serve-static-core';
-import { ParsedQs } from 'qs';
 import { Not } from 'typeorm';
 import { Category } from '../entity/category.entity';
 import AppDataSource from '../shared/db/db.config';

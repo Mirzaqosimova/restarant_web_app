@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import express from 'express';
-import bodyParser from 'body-parser';
 import path from 'path';
 import { Telegraf, session } from 'telegraf';
 import { message } from 'telegraf/filters';
@@ -7,7 +7,6 @@ import { BotService } from './bot/bot.service';
 import { BotAction } from './bot/const/button-action';
 import { BOT_TOKEN, PORT } from './shared/const';
 import AppDataSource from './shared/db/db.config';
-const { match } = require('telegraf-i18n');
 import TelegrafI18n from 'telegraf-i18n';
 import { BotUserStatus } from './bot/const/user-status';
 import { ValidationError } from 'express-validation';

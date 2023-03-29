@@ -5,5 +5,5 @@ const order = require('./validators/order-validation');
 module.exports = {
   ...category,
   ...product,
-  ...order
+  ...order,
 };

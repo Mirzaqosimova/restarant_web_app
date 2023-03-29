@@ -52,7 +52,8 @@ export class ProductService {
       queryData.where['products'] = { is_active: query.isActive };
     }
 
-    return this.categoryService.findOne(1,queryData)
+    return this.categoryService
+      .findOne(1, queryData)
       .then((data) => res.json(ApiResponse.Success(data)))
       .catch((err) => res.json(err));
   }
@@ -101,20 +102,20 @@ export class ProductService {
       })
       .catch((err) => res.json(err));
   }
-  async findAndValidateIds(ids: number[],res){
-const data = await this.productRepository.find({
-  select: {
-id: true,
-price: true
-  },
- where: { id: Any(ids)},
-})
+  async findAndValidateIds(ids: number[], res) {
+    const data = await this.productRepository.find({
+      select: {
+        id: true,
+        price: true,
+      },
+      where: { id: Any(ids) },
+    });
 
-if(ids.length !== data.length){
- return res.json(ApiResponse.NotFound("Some products not found"))
-}
-return data
-}
+    if (ids.length !== data.length) {
+      return res.json(ApiResponse.NotFound('Some products not found'));
+    }
+    return data;
+  }
   delete({ id }, res) {
     return this.productRepository
       .delete({ id })

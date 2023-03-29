@@ -1,13 +1,5 @@
-import {
-  Column,
-  Entity,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Orders } from './order.entity';
-import { User } from './user.entity';
 
 @Entity()
 export class Address {

@@ -10,7 +10,7 @@ import AppDataSource from './shared/db/db.config';
 import TelegrafI18n from 'telegraf-i18n';
 import { BotUserStatus } from './bot/const/user-status';
 import { ValidationError } from 'express-validation';
-import { SessionObjects } from './bot/const/Session-const';
+import { SessionObjects } from './bot/const/session-const';
 const categoryRoute = require('./router/category-router');
 const productRoute = require('./router/product-router');
 const orderRoute = require('./router/order-router');

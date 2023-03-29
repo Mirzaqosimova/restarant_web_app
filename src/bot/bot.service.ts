@@ -6,7 +6,7 @@ import { Address } from '../entity/adress.entity';
 import { YandexService } from './yandex.connect';
 import { UserService } from '../service/user-service';
 import { AddressService } from '../service/address-service';
-import { SessionObjects } from './const/Session-const';
+import { SessionObjects } from './const/session-const';
 import { Not } from 'typeorm';
 
 export class BotService {

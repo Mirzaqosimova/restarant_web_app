@@ -21,7 +21,6 @@ export class MediasService {
   async delete(req, res) {
     const drname =
       path.join(__dirname, '..', '..', 'assets') + `/${req.fileName}`;
-    console.log(drname);
 
     await fs.unlink(drname, function (err) {
       if (err) return res.json(ApiResponse.Conflict('I think file not found'));

@@ -8,7 +8,16 @@ export class UserService {
     return this.instance;
   }
   private userRepository = AppDataSource.getRepository(User);
-  findOne(id: number) {
-    return this.userRepository.findOneBy({ id });
+
+  async create(payload) {
+    return this.userRepository.save({ ...payload });
+  }
+
+  async update(where, payload) {
+    return this.userRepository.update(where, { ...payload });
+  }
+
+  findOneBy(by) {
+    return this.userRepository.findOneBy(by);
   }
 }

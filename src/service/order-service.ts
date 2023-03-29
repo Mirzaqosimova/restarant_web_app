@@ -32,13 +32,15 @@ export class OrderService {
       status: OrderStatus.NOT_PAYED,
     };
     if (payload.addressId) {
-      const address = await this.addressService.findOne(payload.addressId);
+      const address = await this.addressService.findOneBy({
+        id: payload.addressId,
+      });
       if (address === null) {
         return res.json(ApiResponse.NotFound('Address not found'));
       }
       data['address'] = address;
     }
-    const user = await this.userService.findOne(payload.userId);
+    const user = await this.userService.findOneBy({ id: payload.userId });
     if (user === null) {
       return res.json(ApiResponse.NotFound('User not found'));
     }
@@ -67,7 +69,6 @@ export class OrderService {
   }
 
   async findAll(query, res) {
-    console.log(query);
     let q = `select jsonb_build_object('orders',orders.*,'users',users.*,'address',address.*,'products',
     JSON_AGG(DISTINCT(jsonb_build_object('name',products.name,'count',o_product.count,'price',o_product.price)))) as data 
     from orders
@@ -85,7 +86,6 @@ export class OrderService {
       q += ` and orders.status ='${query.status}' `;
     }
     q += '  group by orders.id, users.id,address.id ';
-    console.log(q);
 
     return this.orderRepository
       .query(q)

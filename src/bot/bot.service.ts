@@ -6,6 +6,8 @@ import { BotUserStatus } from './const/user-status';
 import { Message } from './const/message';
 import { Address } from '../entity/adress.entity';
 import { YandexService } from './yandex.connect';
+import { UserService } from '../service/user-service';
+import { AddressService } from '../service/address-service';
 
 export class BotService {
   private static instance = new BotService();
@@ -14,19 +16,20 @@ export class BotService {
   public phoneRegex = /^\+998[3789]{1}[013456789]{1}[0-9]{7}$/;
   public nameRegex = /^[a-zA-Z]{2,20}$/;
   public chatId;
-  private userRepository = AppDataSource.getRepository(User);
-  private addressRepository = AppDataSource.getRepository(Address);
+  private userService = UserService.getInstance();
+  private addressService = AddressService.getInstance();
 
   public static getInstance() {
     return this.instance;
   }
 
-  //agar session yoq bolib lekin databaseda bor bosa i18 ga tilini set qilib qoyish kere
   async setSession(): Promise<any> {
-    const user = await this.userRepository.findOneBy({ chat_id: this.chatId });
-
-    //menuga jonat
-    return user !== null ? BotUserStatus.MENU : BotUserStatus.START;
+    const user = await this.userService.findOneBy({ chat_id: this.chatId });
+    if (user !== null) {
+      this.ctx.i18n.languageCode = user.language;
+      return BotUserStatus.MENU;
+    }
+    return BotUserStatus.START;
   }
 
   async start() {
@@ -56,7 +59,6 @@ export class BotService {
           this.getReplyButtons(),
         )
         .then((sentMessage) => {
-          // save the message ID to delete the reply markup later
           this.ctx.session['messageId'] = sentMessage.message_id;
         });
     } else if (this.userStatus === BotUserStatus.SET_SEND_LANGUAGE) {
@@ -64,10 +66,9 @@ export class BotService {
       return this.ctx
         .reply('settings', this.getReplyButtons())
         .then((sentMessage) => {
-          // save the message ID to delete the reply markup later
           this.ctx.session['messageId'] = sentMessage.message_id;
         });
-    } //Menuga qaytish
+    }
   }
 
   async getPhoneNumberSendMenu(action: boolean) {
@@ -77,7 +78,7 @@ export class BotService {
       return this.ctx.reply('bowqattan jonat');
     }
 
-    await this.userRepository.save({
+    await this.userService.create({
       chat_id: this.chatId,
       phone_number: phone,
       full_name:
@@ -90,7 +91,6 @@ export class BotService {
       language: this.ctx.i18n.languageCode,
     });
 
-    //jsonga yozish kk
     await this.ctx.reply('succesfully saved');
 
     return this.menu();
@@ -110,28 +110,24 @@ export class BotService {
       return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
     }
   }
-  chooseOrderType() {
+  async chooseOrderType() {
     if (this.ctx.message.text === this.ctx.i18n.t(Message.DELIVERY)) {
       this.changeSessionStatus(BotUserStatus.CHOOSE_LOCATION);
       return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
     } else if (this.ctx.message.text === this.ctx.i18n.t(Message.PICKUP)) {
       this.changeSessionStatus(BotUserStatus.ORDER_MENU);
-      return this.ctx.reply('menuni tanlang', this.getReplyButtons());
+      const user = await this.userService.findOneBy({ chat_id: this.chatId });
+      return this.ctx.reply(
+        'menuni tanlang',
+        this.getOrderMenuWebAppButton(user.id),
+      );
     } else if (this.ctx.message.text === this.ctx.i18n.t(Message.BACK)) {
       return this.menu();
     }
   }
   async chooseLocations() {
     if (this.ctx.message.text === this.ctx.i18n.t(Message.MY_LOCATIONS)) {
-      const data = await this.addressRepository
-        .createQueryBuilder('address')
-        .select(['address.address'])
-        .innerJoin('order', 'order', 'order.addressId = address.id')
-        .innerJoin('user', 'user', 'user.id = order.userId')
-        .distinct(true)
-        .where('user.chat_id = :id', { id: this.chatId })
-        .take(10)
-        .getRawMany();
+      const data = await this.addressService.findForBot(this.chatId);
       this.changeSessionStatus(BotUserStatus.CHOOSE_SAVED_LOCATION);
       return this.ctx.reply('kak vam udobna?: ', this.addressButtonList(data));
     } else if (this.ctx.message.text === this.ctx.i18n.t(Message.BACK)) {
@@ -179,7 +175,7 @@ export class BotService {
       delete this.ctx.session.longitude;
       delete this.ctx.session.latitude;
     }
-    const address = await this.addressRepository.findOneBy({
+    const address = await this.addressService.findOneBy({
       address: address_text,
     });
 
@@ -187,40 +183,36 @@ export class BotService {
     if (address !== null) {
       address_id = address.id;
     } else {
-      await this.addressRepository
-        .save(new Address(address_text, longitude, latitude))
+      await this.addressService
+        .create(new Address(address_text, longitude, latitude))
         .then((res) => {
-          console.log(address_id);
           address_id = res.id;
         });
     }
+    const user = await this.userService.findOneBy({ chat_id: this.chatId });
     this.changeSessionStatus(BotUserStatus.ORDER_MENU);
     return this.ctx.reply(
       'menuni tanlang',
-      this.getOrderMenuWebAppButton(address_id),
+      this.getOrderMenuWebAppButton(user.id, address_id),
     );
   }
-  /**bu yeeeeeeeeeeeer
-   *
-   *address user service implement qilib hamma joyga user find one ni togrlab chiqish kk
-   *
-   *
-   */
+
   async setSavedLocation() {
     if (this.ctx.message.text === this.ctx.i18n.t(Message.BACK)) {
       this.changeSessionStatus(BotUserStatus.CHOOSE_LOCATION);
       return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
     } else {
-      const address = await this.addressRepository.findOneBy({
+      const address = await this.addressService.findOneBy({
         address: this.ctx.message.text,
       });
       if (address === null) {
         return this.ctx.reply('Manzil topilmadi');
       }
+      const user = await this.userService.findOneBy({ chat_id: this.chatId });
       this.changeSessionStatus(BotUserStatus.ORDER_MENU);
       return this.ctx.reply(
         'menuni tanlang',
-        this.getOrderMenuWebAppButton(address.id),
+        this.getOrderMenuWebAppButton(user.id, address.id),
       );
     }
   }
@@ -248,10 +240,9 @@ export class BotService {
   async setName() {
     const name = this.ctx.message.text;
     if (!this.nameRegex.test(name)) {
-      //json
       return this.ctx.reply('notori format');
     }
-    await this.userRepository.update(
+    await this.userService.update(
       { chat_id: this.chatId },
       { full_name: String(name) },
     );
@@ -265,9 +256,9 @@ export class BotService {
       return this.ctx.reply('bowqattan jonat');
     }
     await this.changeSessionStatus(BotUserStatus.SETTING);
-    await this.userRepository.update(
+    await this.userService.update(
       { chat_id: this.chatId },
-      { phone_number: phone },
+      { full_name: String(name) },
     );
     this.changeSessionStatus(BotUserStatus.SETTING);
 
@@ -289,7 +280,7 @@ export class BotService {
       await this.ctx.reply(this.ctx.i18n.t(Message.WRONG_PHONE_NUMBER));
       return false;
     }
-    const check = await this.userRepository.findOneBy({ phone_number: phone });
+    const check = await this.userService.findOneBy({ phone_number: phone });
 
     if (check !== null) {
       if (check.chat_id !== this.chatId) {

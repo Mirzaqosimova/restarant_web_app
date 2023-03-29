@@ -9,7 +9,6 @@ function validation(validator) {
 
   return async function (req, res, next) {
     try {
-      console.log(req.query);
       const validationObject = {};
 
       Object.entries(req.body).length !== 0

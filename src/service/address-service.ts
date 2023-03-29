@@ -8,7 +8,24 @@ export class AddressService {
     return this.instance;
   }
   private addressRepository = AppDataSource.getRepository(Address);
-  findOne(id: number) {
-    return this.addressRepository.findOneBy({ id });
+
+  create(address: Address) {
+    return this.addressRepository.save(address);
+  }
+
+  findOneBy(by) {
+    return this.addressRepository.findOneBy(by);
+  }
+
+  findForBot(id) {
+    return this.addressRepository
+      .createQueryBuilder('address')
+      .select(['address.address'])
+      .innerJoin('address.order', 'orders')
+      .innerJoin('orders.user', 'users')
+      .distinct(true)
+      .where('users.chat_id = :id', { id })
+      .take(10)
+      .getRawMany();
   }
 }

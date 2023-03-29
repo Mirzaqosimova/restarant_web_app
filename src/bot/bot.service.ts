@@ -164,10 +164,6 @@ export class BotService {
     }
   }
 
-  /**
-   *
-   * @returns order integratsiya
-   */
   async getMenu() {
     if (this.ctx.message.text === this.ctx.i18n.t(Message.BUTTON_HISTORY)) {
       const data = await this.orderService.findAllForBot(this.chatId);

@@ -13,9 +13,10 @@ import { ValidationError } from 'express-validation';
 const categoryRoute = require('./router/category-router');
 const productRoute = require('./router/product-router');
 const orderRoute = require('./router/order-router');
+const mediaRoute = require('./router/media-router');
 
 const app = express();
-
+app.use(express.static('../assets/'));
 app.use(express.json());
 app.use(express.urlencoded());
 
@@ -39,6 +40,7 @@ app.use(function (err, req, res, next) {
 app.use('/category', categoryRoute);
 app.use('/product', productRoute);
 app.use('/order', orderRoute);
+app.use('/media', mediaRoute);
 
 const bot = new Telegraf(BOT_TOKEN);
 const botService = BotService.getInstance();

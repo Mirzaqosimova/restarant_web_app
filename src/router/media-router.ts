@@ -1,13 +1,15 @@
-// const mediaRouter = express.Router();
-// const multer  = require('multer')
-// const upload = multer({ dest: 'uploads/' })
+import express from 'express';
+import { MediasService } from '../service/media-service';
+const router = express.Router();
+const uploadSingle = require('../shared/media-config');
+const mediaService = MediasService.getInstance();
+const Validator = require('../shared/middlewares/validation');
 
-// mediaRouter.post('/media', upload.single('avatar'), (req, res)=> {
-//   res.send('Home page');
-// });
+router.route('/').post(uploadSingle, (req, res) => {
+  return mediaService.create(req, res);
+});
+router.delete('/:fileName', Validator('media_param'), (req, res) => {
+  return mediaService.delete({ ...req.params }, res);
+});
 
-// mediaRouter.delete('/media/{name}', (req, res) => {
-//   res.send('Home page');
-// });
-
-// module.exports = mediaRouter
+module.exports = router;

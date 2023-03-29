@@ -1,4 +1,4 @@
-import { YANDEX_TOKEN, YANDEX_URL } from '../shared/const';
+import { YANDEX_TOKEN, YANDEX_URL } from './const';
 
 const ATTENDANCE_STUDENT = (geocode: string) => {
   const url = `?apikey=${YANDEX_TOKEN}&geocode=${geocode}&format=json&sco=latlong&kind=house&z=17`;

@@ -3,7 +3,7 @@ import { BotAction } from './const/button-action';
 import { BotUserStatus } from './const/user-status';
 import { Message } from './const/message';
 import { Address } from '../entity/adress.entity';
-import { YandexService } from './yandex.connect';
+import { YandexService } from '../shared/yandex.connect';
 import { UserService } from '../service/user-service';
 import { AddressService } from '../service/address-service';
 import { SessionObjects } from './const/session-const';

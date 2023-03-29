@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Language } from '../shared/enums/languages';
+import { Address } from './adress.entity';
 import { Orders } from './order.entity';
 
 @Entity('users')
@@ -13,7 +14,7 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'bigint', nullable: false })
   chat_id: number;
 
   @Column({ nullable: false })
@@ -21,6 +22,9 @@ export class User {
 
   @Column({ nullable: false })
   full_name: string;
+
+  @OneToMany(() => Address, (address) => address.users)
+  address: Address[];
 
   @OneToMany(() => Orders, (order) => order.user)
   orders: Orders[];

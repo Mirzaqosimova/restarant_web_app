@@ -21,8 +21,7 @@ export class AddressService {
     return this.addressRepository
       .createQueryBuilder('address')
       .select(['address.address'])
-      .innerJoin('address.order', 'orders')
-      .innerJoin('orders.user', 'users')
+      .innerJoin('address.users', 'users')
       .distinct(true)
       .where('users.chat_id = :id', { id })
       .take(10)

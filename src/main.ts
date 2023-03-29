@@ -10,6 +10,7 @@ import AppDataSource from './shared/db/db.config';
 import TelegrafI18n from 'telegraf-i18n';
 import { BotUserStatus } from './bot/const/user-status';
 import { ValidationError } from 'express-validation';
+import { SessionObjects } from './bot/const/Session-const';
 const categoryRoute = require('./router/category-router');
 const productRoute = require('./router/product-router');
 const orderRoute = require('./router/order-router');
@@ -20,7 +21,6 @@ app.use(express.static('../assets/'));
 app.use(express.json());
 app.use(express.urlencoded());
 
-//* Error Handler
 app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.json({
@@ -46,7 +46,7 @@ const bot = new Telegraf(BOT_TOKEN);
 const botService = BotService.getInstance();
 bot.use(session());
 const i18n = new TelegrafI18n({
-  defaultLanguage: 'en',
+  defaultLanguage: 'pt',
   allowMissing: false, // Default true
   directory: path.resolve(__dirname, 'locales'),
 });
@@ -60,16 +60,18 @@ bot.use(async (ctx: any, next) => {
   botService.ctx = ctx;
   if (ctx.message) {
     botService.chatId = ctx.message.chat.id;
-  } else {
+  } else if (ctx.callbackQuery) {
     botService.chatId = ctx.callbackQuery.message.chat.id;
+  } else {
+    return ctx.reply('Oops something went wrong');
   }
   if (ctx.session === undefined) {
     ctx.session = {};
-    ctx.session['status'] = await botService.setSession();
+    await botService.setSession();
   }
 
-  botService.userStatus = ctx.session['status'];
-
+  botService.userStatus = ctx.session[SessionObjects.STATUS];
+  ctx.i18n.languageCode = ctx.session[SessionObjects.LANG];
   await next();
 });
 bot.start(() => {
@@ -125,7 +127,7 @@ bot.on(message('location'), (ctx: any) => {
 
 app.use(bot.webhookCallback('/bot'));
 
-bot.telegram.setWebhook('https://6d83-84-54-94-192.eu.ngrok.io/bot');
+bot.telegram.setWebhook('https://5705-84-54-94-192.eu.ngrok.io/bot');
 
 AppDataSource.initialize()
   .then(() => {

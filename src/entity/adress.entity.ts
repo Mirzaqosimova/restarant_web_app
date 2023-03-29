@@ -1,5 +1,13 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Orders } from './order.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Address {
@@ -8,6 +16,10 @@ export class Address {
 
   @OneToMany(() => Orders, (order) => order.address)
   orders: Orders[];
+
+  @JoinColumn({ name: 'user_id' })
+  @ManyToOne(() => User, (user) => user.address)
+  users: User;
 
   @Column({ nullable: false })
   address: string;
@@ -18,9 +30,10 @@ export class Address {
   @Column({ type: 'real', nullable: false })
   lat: number;
 
-  constructor(address: string, long: number, lat: number) {
+  constructor(address: string, long: number, lat: number, user: User) {
     this.address = address;
     this.lat = lat;
     this.long = long;
+    this.users = user;
   }
 }

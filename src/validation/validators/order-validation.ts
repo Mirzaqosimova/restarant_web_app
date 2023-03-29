@@ -11,7 +11,7 @@ const order_post = Joi.object({
     paymentType: Joi.string()
       .valid(PaymentType.CASH, PaymentType.CLICK, PaymentType.PAYME)
       .required(),
-    adressId: Joi.number().optional(),
+    addressId: Joi.number().optional(),
     userId: Joi.number().required(),
     products: Joi.array()
       .unique((a, b) => a.productId === b.productId)

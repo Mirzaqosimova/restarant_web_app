@@ -8,6 +8,7 @@ import { UserService } from '../service/user-service';
 import { AddressService } from '../service/address-service';
 import { SessionObjects } from './const/session-const';
 import { Not } from 'typeorm';
+import { OrderService } from '../service/order-service';
 
 export class BotService {
   private static instance = new BotService();
@@ -19,6 +20,7 @@ export class BotService {
   public chatId;
   private userService = UserService.getInstance();
   private addressService = AddressService.getInstance();
+  private orderService = OrderService.getInstance();
 
   public static getInstance() {
     return this.instance;
@@ -69,8 +71,6 @@ export class BotService {
           this.ctx.session[SessionObjects.MESSAGE_ID] = sentMessage.message_id;
         });
     } else if (this.userStatus === BotUserStatus.SET_SEND_LANGUAGE) {
-      console.log('as');
-
       this.changeSessionStatus(BotUserStatus.SETTING);
       return this.ctx
         .reply(this.ctx.i18n.t(Message.CHOOSE_ACTION), this.getReplyButtons())
@@ -168,10 +168,13 @@ export class BotService {
    *
    * @returns order integratsiya
    */
-  getMenu() {
+  async getMenu() {
     if (this.ctx.message.text === this.ctx.i18n.t(Message.BUTTON_HISTORY)) {
-      this.changeSessionStatus(BotUserStatus.ORDER_MENU);
-      // return this.ctx.reply('kak vam udobna?: ', this.getReplyButtons());
+      const data = await this.orderService.findAllForBot(this.chatId);
+      if (data === null) {
+        return this.ctx.reply(this.ctx.i18n.t(Message.NO_HISTORY));
+      }
+      return this.ctx.reply(data);
     } else if (this.ctx.message.text === this.ctx.i18n.t(Message.BUTTON_BACK)) {
       return this.menu();
     }

@@ -69,26 +69,8 @@ export class OrderService {
   }
 
   async findAll(query, res) {
-    let q = `select jsonb_build_object('orders',orders.*,'users',users.*,'address',address.*,'products',
-    JSON_AGG(DISTINCT(jsonb_build_object('name',products.name,'count',o_product.count,'price',o_product.price)))) as data 
-    from orders
-    left join address on address.id = orders.address_id
-    inner join order_products o_product on o_product.order_id = orders.id
-    inner join users on users.id = orders.user_id
-    inner join products on products.id = o_product.product_id
-    `;
-    if (query.userId) {
-      q += ` where users.id = ${query.userId} `;
-    } else if (query.status) {
-      q += ` where orders.status ="${query.status}" `;
-    }
-    if (query.status) {
-      q += ` and orders.status ='${query.status}' `;
-    }
-    q += '  group by orders.id, users.id,address.id ';
-
     return this.orderRepository
-      .query(q)
+      .query(this.createQuery(query))
       .then((data) => {
         return res.json(ApiResponse.Success(data));
       })
@@ -136,5 +118,77 @@ group by orders.id, users.id,address.id
         return res.json(ApiResponse.Success(data));
       })
       .catch((err) => res.json(err));
+  }
+
+  async findAllForBot(chatId: number) {
+    const user = await this.userService.findOneBy({ chat_id: chatId });
+    const data = await this.orderRepository.query(
+      this.createQuery({ userId: user.id }),
+    );
+
+    if (data.length === 0) {
+      return null;
+    }
+    let check: string = '';
+    for (let i = 0; i < data.length; i++) {
+      const user = data[i].data.users;
+      const order = data[i].data.orders;
+      const address = data[i].data.address;
+      const products = data[i].data.products;
+      let product: string = 'Products: \n';
+      let j: number = 1;
+      let sum: number = 0;
+      products.forEach((element) => {
+        product +=
+          j +
+          '. ' +
+          element.name +
+          ' ' +
+          element.count +
+          'pc  ' +
+          element.price +
+          '\n';
+        sum += element.price;
+        j++;
+      });
+      const type =
+        address === null
+          ? '\nOrder type: Pickup'
+          : `\nAddress: ${address.address}`;
+      check +=
+        `User: ${user.full_name}\n` +
+        `Order number: ${order.id}\n` +
+        `Phone: ${order.phone_number}\n` +
+        `Date: ${order.created_at.replace(/T/, ' ').replace(/\..+/, '')}\n` +
+        `Status: ${order.status}\n` +
+        product +
+        'Total: ' +
+        sum +
+        ' som' +
+        type +
+        '\n\n';
+    }
+    return check;
+  }
+
+  createQuery(query) {
+    let q = `select jsonb_build_object('orders',orders.*,'users',users.*,'address',address.*,'products',
+    JSON_AGG(DISTINCT(jsonb_build_object('name',products.name,'count',o_product.count,'price',o_product.price)))) as data 
+    from orders
+    left join address on address.id = orders.address_id
+    inner join order_products o_product on o_product.order_id = orders.id
+    inner join users on users.id = orders.user_id
+    inner join products on products.id = o_product.product_id
+    `;
+    if (query.userId) {
+      q += ` where users.id = ${query.userId} `;
+    } else if (query.status) {
+      q += ` where orders.status ="${query.status}" `;
+    }
+    if (query.status) {
+      q += ` and orders.status ='${query.status}' `;
+    }
+    q += '  group by orders.id, users.id,address.id ';
+    return q;
   }
 }

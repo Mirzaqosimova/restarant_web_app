@@ -32,4 +32,5 @@ export enum Message {
   WRONG_PHONE_NUMBER = 'wrong_phone_number',
   BUTTON_HISTORY = 'button.history',
   CHOOSE_LANGUAGE = 'Tilni tanlang:\n\n Choose language:\n\n Bыберите язык:\n',
+  NO_HISTORY = 'no_history',
 }

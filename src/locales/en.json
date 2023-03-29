@@ -16,6 +16,7 @@
     "ask_phone_number": "Send",
     "my_locations": "My addresses"
   },
+  "no_history": "You don't have orders yet",
   "wrong_format": "Invalid format",
   "send_phone": "Send your phone number",
   "send_name": "Please send your full name",

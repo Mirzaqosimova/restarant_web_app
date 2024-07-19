@@ -63,7 +63,7 @@ bot.on(message('contact'), botContact);
 bot.on(message('location'), (ctx: any) => botLocation(ctx));
 
 app.use(bot.webhookCallback('/bot'));
-bot.telegram.setWebhook('https://5705-84-54-94-192.eu.ngrok.io/bot');
+bot.telegram.setWebhook('https://0466-84-54-76-234.ngrok-free.app/bot');
 
 AppDataSource.initialize()
   .then(() => {

@@ -1,4 +1,3 @@
-import createHttpError from 'http-errors';
 import { ApiResponse } from '../response/base.response';
 const Validators = require('../../validation/index');
 
@@ -28,7 +27,7 @@ function validation(validator) {
       if (err.isJoi) {
         return res.json(ApiResponse.Validation(err.message));
       }
-      next(createHttpError(500));
+      next();
     }
   };
 }
